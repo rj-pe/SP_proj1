@@ -91,12 +91,13 @@ void matrix_multiply(struct matrix Am, struct matrix Bm, struct matrix *Cm)
   /* fill in each cell of matrix C */
   for(int row_C = 0; row_C <= C.rows; row_C++)
   {
-    for(int width = 0; width <= C.cols; cell++)
+    for(int width = 0; width < C.cols; cell++)
     {
       for(int i = A_i; i < (A_i + Am.cols); i++)
       {
 	B_i = (cell % C.cols) + C.cols * (i % A.cols);
 	sum += Am.data[i] * Bm.data[B_i];
+	B_i = 0;
       }
       C.data[cell] = sum;
       sum = 0;
