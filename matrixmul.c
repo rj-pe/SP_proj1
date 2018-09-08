@@ -22,7 +22,7 @@ void create_matrix_A(int input[], int *arr, int *cols, int *rows)
     /* resize array */
     arr = (int*) realloc(arr, a);
   }
-}
+}//end create_matrix
 
 void create_matrix_B(int input[], int *arr, int *cols, int *rows )
 {
@@ -41,17 +41,23 @@ void create_matrix_B(int input[], int *arr, int *cols, int *rows )
 
 /* TODO: consider simply passing in the struct (e.g. C) accessing members inside of print
 /*       function */
-void print_matrix(int *arr, int cols, int rows)
+void print_matrix(struct matrix p)
 {
-  if(cols * rows == 0)
+  if(p.cols * p.rows == 0)
   {
-    printf("%d%c%d", rows, ' ', cols);
+    printf("%d%c%d", p.rows, ' ', p.cols);
   }
-  for(int i = 0; i < (cols * rows); ++i )
-  {
-    printf("%d", *(arr+i));
-  }
-  printf("\n");
+  else
+    printf("%d%c%d\n", p.rows, ' ', p.cols);
+    for(int i = 0; i < (p.cols * p.rows); ++i )
+    {
+      printf("%d%c", p.data[i], ' ');
+      if((i+1) % p.cols == 0)
+      {
+	printf("\n");
+      }
+    }
+    printf("\n");
 } //end print_matrix
 
 void load_list(int *in, size_t *size)
@@ -75,6 +81,31 @@ int dimension_check(int ak, int bk)
   return (ak != bk);
 } //end dimension_check
 
+void matrix_multiply(struct matrix Am, struct matrix Bm, struct matrix *Cm)
+{
+  /* initialize counters */
+  int cell = 0;
+  int sum = 0;
+  int A_i = 0;
+  int B_i = 0;
+  /* fill in each cell of matrix C */
+  for(int row_C = 0; row_C <= C.rows; row_C++)
+  {
+    for(int width = 0; width <= C.cols; cell++)
+    {
+      for(int i = A_i; i < (A_i + Am.cols); i++)
+      {
+	B_i = (cell % C.cols) + C.cols * (i % A.cols);
+	sum += Am.data[i] * Bm.data[B_i];
+      }
+      C.data[cell] = sum;
+      sum = 0;
+      width++;
+    }
+    A_i += Am.cols;
+  }  
+}//end matrix_multiply
+
 int main()
 {
 /* using dynamic memory allocation for the arrays that hold the matrices */
@@ -92,18 +123,21 @@ int main()
 /* check that the dimensions of A & B are such that matrix multiplication is possible */
   if(dimension_check(A.cols, B.rows))
   {
-    print_matrix(C.data, C.cols, C.rows);
+    print_matrix(C);
     free(C.data);
     return 0;
   }
 /* for debugging */
-  print_matrix(A.data, A.cols, A.rows);
-  print_matrix(B.data, B.cols, B.rows);
-/* TODO: implement the multilpication procedure */
-  //matrix_multiply(pA, pB, pC);
+  print_matrix(A);
+  print_matrix(B);
+  C.data = (int*) malloc((A.rows * B.cols) * sizeof(int));
+  C.rows = A.rows;
+  C.cols = B.cols;
+  matrix_multiply(A, B, pC);
+  print_matrix(C);
 
 /* release the memory allocated for the arrays */
   free(A.data);
   free(B.data);
   free(input);
-}
+} //end main
