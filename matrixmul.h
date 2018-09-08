@@ -33,3 +33,4 @@ void print_matrix(int *arr, int cols, int rows);
 void load_list(int *list_out, size_t *size);
 int dimension_check(int ak, int bk);
 //void matrix_multiply(int *matrix_A, int *matrix_B, int *matrix_C);
+

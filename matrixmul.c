@@ -14,6 +14,7 @@ void create_matrix_A(int input[], int *arr, int *cols, int *rows)
     *cols = input[1];
     /* place values in array */
     for(int i = 2; i < (A.rows * A.cols) + 2; ++i)
+
     {
       arr[a] = input[i];
       ++a;
@@ -61,7 +62,6 @@ void load_list(int *in, size_t *size)
   /* character. */
 
   //use scanf to load all of the values from input into an array of ints
-
   for(i = 0; scanf("%d", &value) != EOF; i++)
   {
     in[i] = value;
