@@ -1,6 +1,7 @@
 // matrixmul.c
 #include "matrixmul.h"
 
+/* Takes integers stored in the input array and organizes them in a matrix struct */
 void create_matrix_A(int input[], int *arr, int *cols, int *rows)
 {
   int a;
@@ -19,11 +20,14 @@ void create_matrix_A(int input[], int *arr, int *cols, int *rows)
       arr[a] = input[i];
       ++a;
     }
+    /* TODO: Ask Prof. Wang regarding realloc, why am I leaking memory below? */
+    /* one idea is to return the new size and realloc in main()  */
     /* resize array */
-    arr = (int*) realloc(arr, a);
+//    arr = (int*) realloc(arr, a * sizeof(int));
   }
 }//end create_matrix
 
+/* Takes integers stored in the input array and organizes them in a matrix struct */
 void create_matrix_B(int input[], int *arr, int *cols, int *rows )
 {
   int b, start_b;
@@ -36,11 +40,11 @@ void create_matrix_B(int input[], int *arr, int *cols, int *rows )
     arr[b] = input[i];
     ++b;
   }
-  arr = (int*) realloc(arr, b);
+  /* TODO: Ask Prof. Wang regarding realloc, why am I leaking memory below? */
+//  arr = (int*) realloc(arr, b * sizeof(int));
 } //end create_matrix
 
-/* TODO: consider simply passing in the struct (e.g. C) accessing members inside of print
-/*       function */
+/* Prints the dimensions and members of the matrix */
 void print_matrix(struct matrix p)
 {
   if(p.cols * p.rows == 0)
@@ -60,27 +64,31 @@ void print_matrix(struct matrix p)
     printf("\n");
 } //end print_matrix
 
+/* Takes integers from stdin and loads them into an array */
 void load_list(int *in, size_t *size)
 {
   int i, value;
 
-  /* TODO: confirm with Prof. Wang that the input will be via file redirection (include an EOF
-  /* character. */
+  /* TODO: confirm with Prof. Wang that the input will be via file redirection */
+  /* (include an EOF character. */
 
   //use scanf to load all of the values from input into an array of ints
   for(i = 0; scanf("%d", &value) != EOF; i++)
   {
     in[i] = value;
   }
-  in = (int*) realloc(input, i);
+  /* TODO: Ask Prof. Wang regarding realloc, why am I leaking memory below */
+//  in = (int*) realloc(input, i * sizeof(int));
   *size = (size_t) i;
 } //end load_list
 
+/* ensures that the dimensions of the two matrices match */
 int dimension_check(int ak, int bk)
 {
   return (ak != bk);
 } //end dimension_check
 
+/* Computes the matrix product, C, of two matrices, A, & B. */
 void matrix_multiply(struct matrix Am, struct matrix Bm, struct matrix *Cm)
 {
   /* initialize counters */
@@ -88,8 +96,9 @@ void matrix_multiply(struct matrix Am, struct matrix Bm, struct matrix *Cm)
   int sum = 0;
   int A_i = 0;
   int B_i = 0;
+  
   /* fill in each cell of matrix C */
-  for(int row_C = 0; row_C <= C.rows; row_C++)
+  for(int row_C = 0; row_C < C.rows; row_C++)
   {
     for(int width = 0; width < C.cols; cell++)
     {
@@ -99,7 +108,12 @@ void matrix_multiply(struct matrix Am, struct matrix Bm, struct matrix *Cm)
 	sum += Am.data[i] * Bm.data[B_i];
 	B_i = 0;
       }
-      C.data[cell] = sum;
+      if(cell <= (C.rows * C.cols))
+      {
+	C.data[cell] = sum;
+      }
+      else
+	printf("ERROR @ : %d\n", cell);
       sum = 0;
       width++;
     }
@@ -109,36 +123,47 @@ void matrix_multiply(struct matrix Am, struct matrix Bm, struct matrix *Cm)
 
 int main()
 {
-/* using dynamic memory allocation for the arrays that hold the matrices */
-  A.data = (int*) malloc(MAXARRAY * sizeof(int));
+/* dynamic memory allocation for the array that holds input */
   input = (int*) malloc(MAXARRAY * sizeof(int));
-  B.data = (int*) malloc(MAXARRAY * sizeof(int));
+
 /* default value for C will be empty */
-  C.data = (int*) malloc(0 * sizeof(int));
   C.rows = 0;
   C.cols = 0;
-/* process the input into separate arrays */
+
+/* process the input into an array, record its size */
   load_list(input, &input_size);
+
+/* dynamic memory allocation for arrays that hold the matrices */
+  A.data = (int*) malloc((input_size/2) * sizeof(int));  
+  B.data = (int*) malloc((input_size/2) * sizeof(int));
+
+/* process the input data into matrix structs */
   create_matrix_A(input, A.data, &(A.cols), &(A.rows));
   create_matrix_B(input, B.data, &(B.cols), &(B.rows));
+
 /* check that the dimensions of A & B are such that matrix multiplication is possible */
   if(dimension_check(A.cols, B.rows))
   {
     print_matrix(C);
-    free(C.data);
     return 0;
   }
-/* for debugging */
-  print_matrix(A);
-  print_matrix(B);
+
+/* for debugging purposes */
+/*  print_matrix(A); */
+/*  print_matrix(B); */
+
+/* allocate memory for matrix C */
   C.data = (int*) malloc((A.rows * B.cols) * sizeof(int));
   C.rows = A.rows;
   C.cols = B.cols;
+
+/* carry out the multiplication and print the matrix */  
   matrix_multiply(A, B, pC);
   print_matrix(C);
 
-/* release the memory allocated for the arrays */
+/* release allocated memory */
   free(A.data);
   free(B.data);
   free(input);
+  free(C.data);
 } //end main
